@@ -1,0 +1,2 @@
+# squanch
+Squanch leaderboard
