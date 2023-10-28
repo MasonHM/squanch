@@ -1,0 +1,26 @@
+.leaderboard {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+
+  color: white;
+}
+
+.active {
+  display: block;
+  background-color: green;
+}
+
+.inactive {
+  display: none;
+  background-color: purple;
+}
+
+.title {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  text-transform: uppercase;
+}
+
+.data {
+  padding-top: 10px;
+}
