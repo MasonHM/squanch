@@ -14,10 +14,22 @@ interface Props {
   data: WeightData | LiftData;
 }
 
+const COLORS = ["red", "orange", "yellow", "lime", "aqua", "blue", "magenta"];
+
 export default function Leaderboard({ title, active, data }: Props): ReactElement {
+  const shuffledColors = COLORS.map((value) => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+
   return (
     <div className={`${styles.leaderboard} ${active ? styles.active : styles.inactive}`}>
-      <h2 className={styles.title}>{title}</h2>
+      <h2 className={styles.title}>
+        {title.split("").map((char, index) => (
+          <span style={{ color: shuffledColors[index] }} key={char}>
+            {char}
+          </span>
+        ))}
+      </h2>
       <div className={styles.data}>
         {data.map((datum, index) => (
           <p key={datum.name}>
