@@ -14,3 +14,11 @@
 .data {
   padding-top: 10px;
 }
+
+.selector {
+  cursor: pointer;
+  &.active {
+    background-color: aqua;
+    color: red;
+  }
+}

@@ -3,13 +3,15 @@ import { MutableRefObject, useEffect, useRef, useState } from "react";
 import styles from "./page.module.scss";
 import TabGroup from "../tabs/tab-group";
 import Tab from "../tabs/tab";
-import { LiftAndWeightData } from "@/lib/google-sheets";
+import { CombinedData } from "@/lib/google-sheets";
 import Footer from "./footer";
 import { TabCycle } from "../tabs/tab-cycle";
 import { TabContent } from "../tabs/tab-content";
+import ChonkProvider from "../../lib/context-providers/chonk-provider";
+import SortProvider from "@/lib/context-providers/sort-provider";
 
 interface Props {
-  liftAndWeightData: LiftAndWeightData;
+  liftAndWeightData: CombinedData;
 }
 
 const TABS: string[] = ["squanch", "bunch", "dunch", "chonk"];
@@ -44,14 +46,19 @@ export default function PageContent({ liftAndWeightData }: Props) {
         ))}
       </TabGroup>
       <div className={styles.content}>
-        {TABS.map((tabName: string, index: number) => (
-          <TabContent
-            initialData={liftAndWeightData[tabName]}
-            tabName={tabName}
-            active={activeTabIndex == index}
-            key={tabName}
-          />
-        ))}
+        <SortProvider>
+          <ChonkProvider initialData={liftAndWeightData.chonk}>
+            {TABS.map((tabName: string, index: number) => (
+              <TabContent
+                initialData={liftAndWeightData[tabName]}
+                tabName={tabName}
+                active={activeTabIndex == index}
+                key={tabName}
+              />
+            ))}
+          </ChonkProvider>
+        </SortProvider>
+
         <Footer
           startLoops={tcRef.current?.startInterval.bind(tcRef.current)}
           stopLoops={tcRef.current?.stopInterval.bind(tcRef.current)}

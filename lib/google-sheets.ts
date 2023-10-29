@@ -1,6 +1,5 @@
 import "server-only";
 import * as google from "@googleapis/sheets";
-import { sortByLift, sortByWeight } from "./sorting";
 import { GaxiosResponse } from "gaxios";
 
 const googleSheetsAuth = google.auth.fromAPIKey(process.env.GOOGLE_SHEETS_API_KEY || "");
@@ -13,29 +12,27 @@ const DUNCH_CELL_RANGE = "Dunch (v2)!K2:Q81";
 const FIVE_MINUTES_IN_MILLIS = 5 * 60 * 1000;
 
 export type WeightData = {
-  name: string;
-  weight: number;
-}[];
-
-export type LiftData = {
-  name: string;
-  lift: number;
-}[];
-
-export type LiftAndWeightData = {
-  [index: string]: LiftData | WeightData;
+  [name: string]: number;
 };
 
-let cachedData: LiftAndWeightData;
+export type CombinedData = {
+  [index: string]: WeightData;
+  squanch: WeightData;
+  bunch: WeightData;
+  dunch: WeightData;
+  chonk: WeightData;
+};
+
+let cachedData: CombinedData;
 let cacheExpiryTime: Date;
 
-export async function getAllData(): Promise<LiftAndWeightData> {
+export async function getAllData(): Promise<CombinedData> {
   const now = new Date();
   if (!cachedData || (cacheExpiryTime && cacheExpiryTime < now)) {
     const chonkDataRequest: Promise<WeightData> = getChonkData();
-    const squanchDataRequest: Promise<LiftData> = getSquanchData();
-    const bunchDataRequest: Promise<LiftData> = getBunchData();
-    const dunchDataRequest: Promise<LiftData> = getDunchData();
+    const squanchDataRequest: Promise<WeightData> = getSquanchData();
+    const bunchDataRequest: Promise<WeightData> = getBunchData();
+    const dunchDataRequest: Promise<WeightData> = getDunchData();
 
     const [chonkData, squanchData, bunchData, dunchData] = await Promise.all([
       chonkDataRequest,
@@ -51,15 +48,15 @@ export async function getAllData(): Promise<LiftAndWeightData> {
   return cachedData;
 }
 
-export async function getSquanchData(): Promise<LiftData> {
+export async function getSquanchData(): Promise<WeightData> {
   return await getLiftData(SQUANCH_CELL_RANGE);
 }
 
-export async function getBunchData(): Promise<LiftData> {
+export async function getBunchData(): Promise<WeightData> {
   return await getLiftData(BUNCH_CELL_RANGE);
 }
 
-export async function getDunchData(): Promise<LiftData> {
+export async function getDunchData(): Promise<WeightData> {
   return await getLiftData(DUNCH_CELL_RANGE);
 }
 
@@ -78,10 +75,10 @@ async function getWeightData(): Promise<WeightData> {
     console.log(err);
   }
 
-  return [];
+  return {};
 }
 
-async function getLiftData(range: string): Promise<LiftData> {
+async function getLiftData(range: string): Promise<WeightData> {
   try {
     const response = await getData(range);
     if (response.data.values) {
@@ -92,27 +89,27 @@ async function getLiftData(range: string): Promise<LiftData> {
     console.log(err);
   }
 
-  return [];
+  return {};
 }
 
 function processWeightRows(rows: any[][]): WeightData {
   const names = rows[0];
   const weights = rows[1];
-  const result: WeightData = [];
+  const result: WeightData = {};
 
   // For each name (column), the corresponding weight is directly below
   for (let i = 0; i < names.length; i++) {
     if (names[i] != "") {
-      result.push({ name: names[i], weight: weights[i] });
+      result[names[i]] = weights[i];
     }
   }
 
-  return sortByWeight(result);
+  return result;
 }
 
-function processLiftRows(rows: any[][]): LiftData {
+function processLiftRows(rows: any[][]): WeightData {
   const names = rows[0];
-  const result: LiftData = [];
+  const result: WeightData = {};
 
   // For each name (column), look for the lowest non-empty cell
   for (let i = 0; i < names.length; i++) {
@@ -121,10 +118,10 @@ function processLiftRows(rows: any[][]): LiftData {
       const currLift = rows[j][i];
       if (currLift) latestLift = currLift;
     }
-    result.push({ name: names[i], lift: latestLift });
+    result[names[i]] = latestLift;
   }
 
-  return sortByLift(result);
+  return result;
 }
 
 function getData(range: string): Promise<GaxiosResponse<google.sheets_v4.Schema$ValueRange>> {
