@@ -10,19 +10,18 @@ export type LeaderboardData = {
 
 interface Props {
   title: string;
-  active: boolean;
   data: WeightData | LiftData;
 }
 
 const COLORS = ["red", "orange", "yellow", "lime", "aqua", "blue", "magenta"];
 
-export default function Leaderboard({ title, active, data }: Props): ReactElement {
+export default function Leaderboard({ title, data }: Props): ReactElement {
   const shuffledColors = COLORS.map((value) => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value);
 
   return (
-    <div className={`${styles.leaderboard} ${active ? styles.active : styles.inactive}`}>
+    <div className={styles.leaderboard}>
       <h2 className={styles.title}>
         {title.split("").map((char, index) => (
           <span style={{ color: shuffledColors[index] }} key={char}>

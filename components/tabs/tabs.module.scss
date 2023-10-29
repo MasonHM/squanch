@@ -22,7 +22,7 @@ $min-tab-height: 50px;
   background-color: blue;
   border: 3px solid orange;
 
-  &.active {
+  &.selected {
     background-color: green;
     border-bottom: 0;
   }
@@ -38,4 +38,14 @@ $min-tab-height: 50px;
       cursor: default;
     }
   }
+}
+
+.active {
+  display: block;
+  background-color: green;
+}
+
+.inactive {
+  display: none;
+  background-color: purple;
 }

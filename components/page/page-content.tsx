@@ -4,9 +4,9 @@ import styles from "./page.module.scss";
 import TabGroup from "../tabs/tab-group";
 import Tab from "../tabs/tab";
 import { LiftAndWeightData } from "@/lib/google-sheets";
-import Leaderboard from "../leaderboard/leaderboard";
 import Footer from "./footer";
-import { TabCycle } from "./tab-cycle";
+import { TabCycle } from "../tabs/tab-cycle";
+import { TabContent } from "../tabs/tab-content";
 
 interface Props {
   liftAndWeightData: LiftAndWeightData;
@@ -33,7 +33,7 @@ export default function PageContent({ liftAndWeightData }: Props) {
       <TabGroup>
         {TABS.map((tabName: string, index: number) => (
           <Tab
-            active={activeTabIndex == index}
+            selected={activeTabIndex == index}
             onClick={() => {
               setActiveTabIndex(index);
               tcRef.current?.stopInterval();
@@ -43,17 +43,15 @@ export default function PageContent({ liftAndWeightData }: Props) {
           />
         ))}
       </TabGroup>
-      <div className={styles["page-content"]}>
-        {TABS.map((tabName: string, index: number) => {
-          return (
-            <Leaderboard
-              data={liftAndWeightData[tabName]}
-              active={activeTabIndex == index}
-              title={tabName}
-              key={tabName}
-            />
-          );
-        })}
+      <div className={styles.content}>
+        {TABS.map((tabName: string, index: number) => (
+          <TabContent
+            initialData={liftAndWeightData[tabName]}
+            tabName={tabName}
+            active={activeTabIndex == index}
+            key={tabName}
+          />
+        ))}
         <Footer
           startLoops={tcRef.current?.startInterval.bind(tcRef.current)}
           stopLoops={tcRef.current?.stopInterval.bind(tcRef.current)}
