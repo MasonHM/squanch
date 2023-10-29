@@ -1,1 +1,1 @@
-export const DATA_REFRESH_MILLIS = 10000;
+export const DATA_REFRESH_MILLIS = 20000;
