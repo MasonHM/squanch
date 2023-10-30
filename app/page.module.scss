@@ -3,17 +3,13 @@
   height: 90vh;
 }
 
-.footer {
-  bottom: 0%;
-  position: fixed;
+.loading {
+  height: 100%;
   width: 100%;
-  padding: 10px;
+  color: lime;
+  background-color: magenta;
 
   display: flex;
   justify-content: center;
   align-items: center;
-
-  span {
-    cursor: pointer;
-  }
 }

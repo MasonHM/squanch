@@ -22,7 +22,8 @@ export default function Leaderboard({ title, data }: Props): ReactElement {
     let liftData = data as LiftArray;
     leaderboardData = <LiftLeaderboardData data={liftData} />;
   } else {
-    leaderboardData = <WeightLeaderboardData />;
+    let weightData = data as WeightMap;
+    leaderboardData = <WeightLeaderboardData data={weightData} />;
   }
   return (
     <div className={styles.leaderboard}>

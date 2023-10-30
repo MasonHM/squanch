@@ -1,8 +1,8 @@
-import { ChonkContext } from "@/lib/context-providers/chonk-provider";
 import { LeaderboardSortContext, LeaderboardSortContextData, getSortFunc } from "@/lib/context-providers/sort-provider";
 import { LiftArray, WeightMap } from "@/lib/google-sheets";
 import { useContext } from "react";
 import styles from "./leaderboard.module.scss";
+import { DataContext } from "@/lib/context-providers/data-provider";
 
 export type LeaderBoardDatum = {
   name: string;
@@ -11,7 +11,7 @@ export type LeaderBoardDatum = {
 };
 
 export function LiftLeaderboardData({ data }: { data: LiftArray }) {
-  const weightData: WeightMap = useContext(ChonkContext);
+  const weightData: WeightMap = useContext(DataContext).chonk;
   const leaderboardData: LeaderBoardDatum[] = calculateLiftData(data, weightData);
   const leaderboardSortContext: LeaderboardSortContextData = useContext(LeaderboardSortContext);
   const sortedData = leaderboardData.sort(getSortFunc(leaderboardSortContext.sortMethod));
@@ -19,9 +19,8 @@ export function LiftLeaderboardData({ data }: { data: LiftArray }) {
   return <LeaderBoardList sortedDataArray={sortedData} />;
 }
 
-export function WeightLeaderboardData() {
-  const weightData: WeightMap = useContext(ChonkContext);
-  const leaderboardData: LeaderBoardDatum[] = calculateWeightData(weightData);
+export function WeightLeaderboardData({ data }: { data: WeightMap }) {
+  const leaderboardData: LeaderBoardDatum[] = calculateWeightData(data);
   const sortedData = leaderboardData.sort((a: LeaderBoardDatum, b: LeaderBoardDatum) => b.weight - a.weight);
 
   return <LeaderBoardList sortedDataArray={sortedData} />;

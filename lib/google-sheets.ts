@@ -1,6 +1,7 @@
 import "server-only";
 import * as google from "@googleapis/sheets";
 import { GaxiosResponse } from "gaxios";
+import { CACHE_EXPIRY_TIME_MILLIS } from "./constants";
 
 const googleSheetsAuth = google.auth.fromAPIKey(process.env.GOOGLE_SHEETS_API_KEY || "");
 const sheets = google.sheets({ version: "v4", auth: googleSheetsAuth });
@@ -9,7 +10,6 @@ const CHONK_CELL_RANGE = "Bunch (v2)!A2:H3";
 const BUNCH_CELL_RANGE = "Bunch (v2)!K2:Q82";
 const SQUANCH_CELL_RANGE = "Squanch (v2)!K2:Q81";
 const DUNCH_CELL_RANGE = "Dunch (v2)!K2:Q81";
-const FIVE_MINUTES_IN_MILLIS = 5 * 60 * 1000;
 
 export type LiftArray = {
   name: string;
@@ -21,35 +21,34 @@ export type WeightMap = {
 };
 
 export type CombinedData = {
-  squanch: LiftArray;
-  bunch: LiftArray;
-  dunch: LiftArray;
+  liftData: {
+    [name: string]: LiftArray;
+    squanch: LiftArray;
+    bunch: LiftArray;
+    dunch: LiftArray;
+  };
   chonk: WeightMap;
 };
 
-let cachedData: CombinedData;
-let cacheExpiryTime: Date;
-
 export async function getAllData(): Promise<CombinedData> {
-  const now = new Date();
-  if (!cachedData || (cacheExpiryTime && cacheExpiryTime < now)) {
-    const chonkDataRequest: Promise<WeightMap> = getChonkData();
-    const squanchDataRequest: Promise<LiftArray> = getSquanchData();
-    const bunchDataRequest: Promise<LiftArray> = getBunchData();
-    const dunchDataRequest: Promise<LiftArray> = getDunchData();
+  const chonkDataRequest: Promise<WeightMap> = getCachedWeightMapDataOrFallback(getChonkData);
+  const squanchDataRequest: Promise<LiftArray> = getCachedLiftArrayDataOrFallback("squanch", getSquanchData);
+  const bunchDataRequest: Promise<LiftArray> = getCachedLiftArrayDataOrFallback("bunch", getBunchData);
+  const dunchDataRequest: Promise<LiftArray> = getCachedLiftArrayDataOrFallback("dunch", getDunchData);
 
-    const [chonkData, squanchData, bunchData, dunchData] = await Promise.all([
-      chonkDataRequest,
-      squanchDataRequest,
-      bunchDataRequest,
-      dunchDataRequest,
-    ]);
+  const [chonkData, squanchData, bunchData, dunchData] = await Promise.all([
+    chonkDataRequest,
+    squanchDataRequest,
+    bunchDataRequest,
+    dunchDataRequest,
+  ]);
 
-    cacheExpiryTime = new Date(now.getTime() + FIVE_MINUTES_IN_MILLIS);
-    cachedData = { squanch: squanchData, bunch: bunchData, dunch: dunchData, chonk: chonkData };
-  }
+  const combinedData: CombinedData = {
+    liftData: { squanch: squanchData, bunch: bunchData, dunch: dunchData },
+    chonk: chonkData,
+  };
 
-  return cachedData;
+  return combinedData;
 }
 
 export async function getSquanchData(): Promise<LiftArray> {
@@ -66,6 +65,41 @@ export async function getDunchData(): Promise<LiftArray> {
 
 export async function getChonkData(): Promise<WeightMap> {
   return await getWeightData();
+}
+
+let cachedLiftArrayData: {
+  [key: string]: {
+    data: LiftArray;
+    expiryTime: Date;
+  };
+} = {};
+export async function getCachedLiftArrayDataOrFallback(
+  cacheKey: string,
+  fallback: () => Promise<LiftArray>
+): Promise<LiftArray> {
+  let cachedData = cachedLiftArrayData[cacheKey];
+  const now = new Date();
+  if (!cachedData || (cachedData.expiryTime && cachedData.expiryTime < now)) {
+    const data: LiftArray = await fallback();
+    const expiryTime = new Date(now.getTime() + CACHE_EXPIRY_TIME_MILLIS);
+    cachedData = { data: data, expiryTime: expiryTime };
+    cachedLiftArrayData[cacheKey] = cachedData;
+  }
+  return cachedData.data;
+}
+
+let cachedWeightMap: {
+  data: WeightMap;
+  expiryTime: Date;
+};
+export async function getCachedWeightMapDataOrFallback(fallback: () => Promise<WeightMap>): Promise<WeightMap> {
+  const now = new Date();
+  if (!cachedWeightMap || (cachedWeightMap.expiryTime && cachedWeightMap.expiryTime < now)) {
+    const data: WeightMap = await fallback();
+    const expiryTime = new Date(now.getTime() + CACHE_EXPIRY_TIME_MILLIS);
+    cachedWeightMap = { data: data, expiryTime: expiryTime };
+  }
+  return cachedWeightMap.data;
 }
 
 async function getWeightData(): Promise<WeightMap> {

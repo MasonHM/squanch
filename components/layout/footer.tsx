@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import styles from "./page.module.scss";
+import styles from "./footer.module.scss";
 
 interface Props {
   startLoops: (() => void) | undefined;

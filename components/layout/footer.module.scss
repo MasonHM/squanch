@@ -1,0 +1,14 @@
+.footer {
+  bottom: 0%;
+  position: fixed;
+  width: 100%;
+  padding: 10px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  span {
+    cursor: pointer;
+  }
+}
