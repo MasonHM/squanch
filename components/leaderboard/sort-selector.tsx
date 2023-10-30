@@ -1,9 +1,13 @@
-import { SortContext, SortContextData, SortMethod } from "@/lib/context-providers/sort-provider";
+import {
+  LeaderboardSortContext,
+  LeaderboardSortContextData,
+  LeaderboardSortMethod as SortMethod,
+} from "@/lib/context-providers/sort-provider";
 import { useContext } from "react";
 import styles from "./leaderboard.module.scss";
 
 export default function SortSelector() {
-  const sortContext: SortContextData = useContext(SortContext);
+  const sortContext: LeaderboardSortContextData = useContext(LeaderboardSortContext);
 
   return (
     <>

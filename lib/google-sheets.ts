@@ -11,16 +11,20 @@ const SQUANCH_CELL_RANGE = "Squanch (v2)!K2:Q81";
 const DUNCH_CELL_RANGE = "Dunch (v2)!K2:Q81";
 const FIVE_MINUTES_IN_MILLIS = 5 * 60 * 1000;
 
-export type WeightData = {
+export type LiftArray = {
+  name: string;
+  weight: number;
+}[];
+
+export type WeightMap = {
   [name: string]: number;
 };
 
 export type CombinedData = {
-  [index: string]: WeightData;
-  squanch: WeightData;
-  bunch: WeightData;
-  dunch: WeightData;
-  chonk: WeightData;
+  squanch: LiftArray;
+  bunch: LiftArray;
+  dunch: LiftArray;
+  chonk: WeightMap;
 };
 
 let cachedData: CombinedData;
@@ -29,10 +33,10 @@ let cacheExpiryTime: Date;
 export async function getAllData(): Promise<CombinedData> {
   const now = new Date();
   if (!cachedData || (cacheExpiryTime && cacheExpiryTime < now)) {
-    const chonkDataRequest: Promise<WeightData> = getChonkData();
-    const squanchDataRequest: Promise<WeightData> = getSquanchData();
-    const bunchDataRequest: Promise<WeightData> = getBunchData();
-    const dunchDataRequest: Promise<WeightData> = getDunchData();
+    const chonkDataRequest: Promise<WeightMap> = getChonkData();
+    const squanchDataRequest: Promise<LiftArray> = getSquanchData();
+    const bunchDataRequest: Promise<LiftArray> = getBunchData();
+    const dunchDataRequest: Promise<LiftArray> = getDunchData();
 
     const [chonkData, squanchData, bunchData, dunchData] = await Promise.all([
       chonkDataRequest,
@@ -48,23 +52,23 @@ export async function getAllData(): Promise<CombinedData> {
   return cachedData;
 }
 
-export async function getSquanchData(): Promise<WeightData> {
+export async function getSquanchData(): Promise<LiftArray> {
   return await getLiftData(SQUANCH_CELL_RANGE);
 }
 
-export async function getBunchData(): Promise<WeightData> {
+export async function getBunchData(): Promise<LiftArray> {
   return await getLiftData(BUNCH_CELL_RANGE);
 }
 
-export async function getDunchData(): Promise<WeightData> {
+export async function getDunchData(): Promise<LiftArray> {
   return await getLiftData(DUNCH_CELL_RANGE);
 }
 
-export async function getChonkData(): Promise<WeightData> {
+export async function getChonkData(): Promise<WeightMap> {
   return await getWeightData();
 }
 
-async function getWeightData(): Promise<WeightData> {
+async function getWeightData(): Promise<WeightMap> {
   try {
     const response = await getData(CHONK_CELL_RANGE);
     if (response.data.values) {
@@ -78,7 +82,7 @@ async function getWeightData(): Promise<WeightData> {
   return {};
 }
 
-async function getLiftData(range: string): Promise<WeightData> {
+async function getLiftData(range: string): Promise<LiftArray> {
   try {
     const response = await getData(range);
     if (response.data.values) {
@@ -89,13 +93,13 @@ async function getLiftData(range: string): Promise<WeightData> {
     console.log(err);
   }
 
-  return {};
+  return [];
 }
 
-function processWeightRows(rows: any[][]): WeightData {
+function processWeightRows(rows: any[][]): WeightMap {
   const names = rows[0];
   const weights = rows[1];
-  const result: WeightData = {};
+  const result: WeightMap = {};
 
   // For each name (column), the corresponding weight is directly below
   for (let i = 0; i < names.length; i++) {
@@ -107,9 +111,9 @@ function processWeightRows(rows: any[][]): WeightData {
   return result;
 }
 
-function processLiftRows(rows: any[][]): WeightData {
+function processLiftRows(rows: any[][]): LiftArray {
   const names = rows[0];
-  const result: WeightData = {};
+  const result: LiftArray = [];
 
   // For each name (column), look for the lowest non-empty cell
   for (let i = 0; i < names.length; i++) {
@@ -118,7 +122,7 @@ function processLiftRows(rows: any[][]): WeightData {
       const currLift = rows[j][i];
       if (currLift) latestLift = currLift;
     }
-    result[names[i]] = latestLift;
+    result.push({ name: names[i], weight: latestLift });
   }
 
   return result;

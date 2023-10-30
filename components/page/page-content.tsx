@@ -3,12 +3,12 @@ import { MutableRefObject, useEffect, useRef, useState } from "react";
 import styles from "./page.module.scss";
 import TabGroup from "../tabs/tab-group";
 import Tab from "../tabs/tab";
-import { CombinedData } from "@/lib/google-sheets";
+import { CombinedData, LiftArray } from "@/lib/google-sheets";
 import Footer from "./footer";
 import { TabCycle } from "../tabs/tab-cycle";
-import { TabContent } from "../tabs/tab-content";
+import { LiftTabContent, WeightTabContent } from "../tabs/tab-content";
 import ChonkProvider from "../../lib/context-providers/chonk-provider";
-import SortProvider from "@/lib/context-providers/sort-provider";
+import LeaderboardSortProvider from "@/lib/context-providers/sort-provider";
 
 interface Props {
   liftAndWeightData: CombinedData;
@@ -21,6 +21,12 @@ export default function PageContent({ liftAndWeightData }: Props) {
   const tcRef: MutableRefObject<TabCycle | undefined> = useRef();
   const cycleTabFunc = () => {
     setActiveTabIndex((i) => (i + 1) % TABS.length);
+  };
+
+  const weightData: { [index: string]: LiftArray } = {
+    squanch: liftAndWeightData.squanch,
+    bunch: liftAndWeightData.bunch,
+    dunch: liftAndWeightData.dunch,
   };
 
   useEffect(() => {
@@ -46,18 +52,27 @@ export default function PageContent({ liftAndWeightData }: Props) {
         ))}
       </TabGroup>
       <div className={styles.content}>
-        <SortProvider>
-          <ChonkProvider initialData={liftAndWeightData.chonk}>
-            {TABS.map((tabName: string, index: number) => (
-              <TabContent
-                initialData={liftAndWeightData[tabName]}
-                tabName={tabName}
-                active={activeTabIndex == index}
-                key={tabName}
-              />
-            ))}
-          </ChonkProvider>
-        </SortProvider>
+        <ChonkProvider initialData={liftAndWeightData.chonk}>
+          <LeaderboardSortProvider>
+            {TABS.map((tabName: string, index: number) =>
+              tabName == "chonk" ? (
+                <WeightTabContent
+                  data={liftAndWeightData[tabName]}
+                  tabName={tabName}
+                  active={activeTabIndex == index}
+                  key={tabName}
+                />
+              ) : (
+                <LiftTabContent
+                  initialData={weightData[tabName]}
+                  tabName={tabName}
+                  active={activeTabIndex == index}
+                  key={tabName}
+                />
+              )
+            )}
+          </LeaderboardSortProvider>
+        </ChonkProvider>
 
         <Footer
           startLoops={tcRef.current?.startInterval.bind(tcRef.current)}

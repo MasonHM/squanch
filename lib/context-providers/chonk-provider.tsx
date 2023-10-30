@@ -1,17 +1,17 @@
 import { DATA_REFRESH_MILLIS } from "@/lib/constants";
-import { WeightData } from "@/lib/google-sheets";
+import { WeightMap } from "@/lib/google-sheets";
 import { useInterval } from "@/lib/hooks/use-interval";
 import { ReactNode, createContext, useState } from "react";
 
 interface Props {
   children: ReactNode;
-  initialData: WeightData;
+  initialData: WeightMap;
 }
 
-export const ChonkContext = createContext<WeightData>({});
+export const ChonkContext = createContext<WeightMap>({});
 
 export default function ChonkProvider({ children, initialData }: Props) {
-  const [data, setData] = useState<WeightData>(initialData);
+  const [data, setData] = useState<WeightMap>(initialData);
 
   const fetchWeightData = async () => {
     const res = await fetch(`/api/chonk`);
