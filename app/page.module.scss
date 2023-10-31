@@ -1,9 +1,11 @@
 .page {
   height: 100vh;
+  min-height: 550px;
   background-color: red;
 }
 
 .content {
+  height: 90vh;
   background-color: red;
 }
 
