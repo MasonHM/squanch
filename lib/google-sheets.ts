@@ -1,6 +1,5 @@
 import "server-only";
 import * as google from "@googleapis/sheets";
-import { GaxiosResponse } from "gaxios";
 import { CACHE_EXPIRY_TIME_MILLIS } from "./constants";
 
 const googleSheetsAuth = google.auth.fromAPIKey(process.env.GOOGLE_SHEETS_API_KEY || "");
@@ -10,11 +9,13 @@ const CHONK_CELL_RANGE = "Bunch (v2)!A2:H3";
 const BUNCH_CELL_RANGE = "Bunch (v2)!K2:Q82";
 const SQUANCH_CELL_RANGE = "Squanch (v2)!K2:Q81";
 const DUNCH_CELL_RANGE = "Dunch (v2)!K2:Q81";
+const DATE_CELL_RANGE = "Bunch (v2)!A4:A82";
 
-export type LiftArray = {
+export type LiftData = {
   name: string;
-  weight: number;
-}[];
+  curr1RM: number;
+  raw: { [index: number]: number };
+};
 
 export type WeightMap = {
   [name: string]: number;
@@ -22,112 +23,57 @@ export type WeightMap = {
 
 export type CombinedData = {
   liftData: {
-    [name: string]: LiftArray;
-    squanch: LiftArray;
-    bunch: LiftArray;
-    dunch: LiftArray;
+    [name: string]: LiftData[];
+    squanch: LiftData[];
+    bunch: LiftData[];
+    dunch: LiftData[];
   };
-  chonk: WeightMap;
+  weightData: WeightMap;
+  graphLabels: string[];
 };
 
-export async function getAllData(): Promise<CombinedData> {
-  const chonkDataRequest: Promise<WeightMap> = getCachedWeightMapDataOrFallback(getChonkData);
-  const squanchDataRequest: Promise<LiftArray> = getCachedLiftArrayDataOrFallback("squanch", getSquanchData);
-  const bunchDataRequest: Promise<LiftArray> = getCachedLiftArrayDataOrFallback("bunch", getBunchData);
-  const dunchDataRequest: Promise<LiftArray> = getCachedLiftArrayDataOrFallback("dunch", getDunchData);
+export async function getSquanchData(): Promise<LiftData[]> {
+  return processLiftRows(await getData(SQUANCH_CELL_RANGE));
+}
 
-  const [chonkData, squanchData, bunchData, dunchData] = await Promise.all([
+export async function getBunchData(): Promise<LiftData[]> {
+  return processLiftRows(await getData(BUNCH_CELL_RANGE));
+}
+
+export async function getDunchData(): Promise<LiftData[]> {
+  return processLiftRows(await getData(DUNCH_CELL_RANGE));
+}
+
+export async function getChonkData(): Promise<WeightMap> {
+  return processWeightRows(await getData(CHONK_CELL_RANGE));
+}
+
+export async function getAllData(): Promise<CombinedData> {
+  const chonkDataRequest: Promise<WeightMap> = getChonkData();
+  const squanchDataRequest: Promise<LiftData[]> = getSquanchData();
+  const bunchDataRequest: Promise<LiftData[]> = getBunchData();
+  const dunchDataRequest: Promise<LiftData[]> = getDunchData();
+  const dateRangeRequest: Promise<string[]> = getDateRangeForGraph();
+
+  const [chonkData, squanchData, bunchData, dunchData, dateRange] = await Promise.all([
     chonkDataRequest,
     squanchDataRequest,
     bunchDataRequest,
     dunchDataRequest,
+    dateRangeRequest,
   ]);
 
   const combinedData: CombinedData = {
     liftData: { squanch: squanchData, bunch: bunchData, dunch: dunchData },
-    chonk: chonkData,
+    weightData: chonkData,
+    graphLabels: dateRange,
   };
 
   return combinedData;
 }
 
-export async function getSquanchData(): Promise<LiftArray> {
-  return await getLiftData(SQUANCH_CELL_RANGE);
-}
-
-export async function getBunchData(): Promise<LiftArray> {
-  return await getLiftData(BUNCH_CELL_RANGE);
-}
-
-export async function getDunchData(): Promise<LiftArray> {
-  return await getLiftData(DUNCH_CELL_RANGE);
-}
-
-export async function getChonkData(): Promise<WeightMap> {
-  return await getWeightData();
-}
-
-let cachedLiftArrayData: {
-  [key: string]: {
-    data: LiftArray;
-    expiryTime: Date;
-  };
-} = {};
-export async function getCachedLiftArrayDataOrFallback(
-  cacheKey: string,
-  fallback: () => Promise<LiftArray>
-): Promise<LiftArray> {
-  let cachedData = cachedLiftArrayData[cacheKey];
-  const now = new Date();
-  if (!cachedData || (cachedData.expiryTime && cachedData.expiryTime < now)) {
-    const data: LiftArray = await fallback();
-    const expiryTime = new Date(now.getTime() + CACHE_EXPIRY_TIME_MILLIS);
-    cachedData = { data: data, expiryTime: expiryTime };
-    cachedLiftArrayData[cacheKey] = cachedData;
-  }
-  return cachedData.data;
-}
-
-let cachedWeightMap: {
-  data: WeightMap;
-  expiryTime: Date;
-};
-export async function getCachedWeightMapDataOrFallback(fallback: () => Promise<WeightMap>): Promise<WeightMap> {
-  const now = new Date();
-  if (!cachedWeightMap || (cachedWeightMap.expiryTime && cachedWeightMap.expiryTime < now)) {
-    const data: WeightMap = await fallback();
-    const expiryTime = new Date(now.getTime() + CACHE_EXPIRY_TIME_MILLIS);
-    cachedWeightMap = { data: data, expiryTime: expiryTime };
-  }
-  return cachedWeightMap.data;
-}
-
-async function getWeightData(): Promise<WeightMap> {
-  try {
-    const response = await getData(CHONK_CELL_RANGE);
-    if (response.data.values) {
-      const result = processWeightRows(response.data.values);
-      return result;
-    }
-  } catch (err) {
-    console.log(err);
-  }
-
-  return {};
-}
-
-async function getLiftData(range: string): Promise<LiftArray> {
-  try {
-    const response = await getData(range);
-    if (response.data.values) {
-      const result = processLiftRows(response.data.values);
-      return result;
-    }
-  } catch (err) {
-    console.log(err);
-  }
-
-  return [];
+async function getDateRangeForGraph(): Promise<string[]> {
+  return processDatesForGraph(await getData(DATE_CELL_RANGE));
 }
 
 function processWeightRows(rows: any[][]): WeightMap {
@@ -145,26 +91,59 @@ function processWeightRows(rows: any[][]): WeightMap {
   return result;
 }
 
-function processLiftRows(rows: any[][]): LiftArray {
+function processLiftRows(rows: any[][]): LiftData[] {
   const names = rows[0];
-  const result: LiftArray = [];
+  const result: LiftData[] = [];
 
-  // For each name (column), look for the lowest non-empty cell
+  // For each name (column), curr1RM is the lowest non-empty cell
   for (let i = 0; i < names.length; i++) {
-    let latestLift = 0;
+    let curr1RM = 0;
+    const rawData: { [index: number]: number } = {};
     for (let j = 1; j < rows.length; j++) {
       const currLift = rows[j][i];
-      if (currLift) latestLift = currLift;
+      if (currLift) {
+        curr1RM = currLift;
+        rawData[j - 1] = currLift;
+      }
     }
-    result.push({ name: names[i], weight: latestLift });
+    result.push({ name: names[i], curr1RM: curr1RM, raw: rawData });
   }
 
   return result;
 }
 
-function getData(range: string): Promise<GaxiosResponse<google.sheets_v4.Schema$ValueRange>> {
-  return sheets.spreadsheets.values.get({
-    spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: range,
-  });
+function processDatesForGraph(rows: any[][]): string[] {
+  return rows.map((row) => row[0]);
+}
+
+const rawDataCache: {
+  [key: string]: {
+    data: any[][];
+    expiryTime: Date;
+  };
+} = {};
+
+async function getData(range: string): Promise<any[][]> {
+  const now = new Date();
+  let cachedData = rawDataCache[range];
+  try {
+    if (!cachedData || (cachedData.expiryTime && cachedData.expiryTime < now)) {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: range,
+      });
+      if (response.data.values) {
+        const expiryTime = new Date(now.getTime() + CACHE_EXPIRY_TIME_MILLIS);
+        cachedData = { data: response.data.values, expiryTime: expiryTime };
+      } else {
+        cachedData = { data: [], expiryTime: now };
+      }
+      rawDataCache[range] = cachedData;
+    } else {
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
+  return cachedData.data;
 }

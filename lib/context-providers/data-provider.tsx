@@ -14,7 +14,8 @@ const DEFAULT_DATA: CombinedData = {
     bunch: [],
     dunch: [],
   },
-  chonk: {},
+  weightData: {},
+  graphLabels: [],
 };
 
 export const DataContext = createContext<CombinedData>(DEFAULT_DATA);

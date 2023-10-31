@@ -1,11 +1,8 @@
 import styles from "./leaderboard.module.scss";
-
-const COLORS = ["red", "orange", "yellow", "lime", "aqua", "blue", "magenta"];
+import { getShuffledColors } from "@/lib/colors/color-helper";
 
 export default function LeaderboardTitle({ title }: { title: string }) {
-  const shuffledColors = COLORS.map((value) => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value);
+  const shuffledColors = getShuffledColors();
 
   return (
     <h2 className={styles.title}>

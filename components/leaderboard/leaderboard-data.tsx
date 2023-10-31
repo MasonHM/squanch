@@ -1,8 +1,9 @@
 import { LeaderboardSortContext, LeaderboardSortContextData, getSortFunc } from "@/lib/context-providers/sort-provider";
-import { LiftArray, WeightMap } from "@/lib/google-sheets";
+import { LiftData, WeightMap } from "@/lib/google-sheets";
 import { useContext } from "react";
 import styles from "./leaderboard.module.scss";
 import { DataContext } from "@/lib/context-providers/data-provider";
+import { getLiftAsPercentageOfBodyWeight } from "@/lib/weight/weight-helper";
 
 export type LeaderBoardDatum = {
   name: string;
@@ -10,8 +11,8 @@ export type LeaderBoardDatum = {
   percentage?: number;
 };
 
-export function LiftLeaderboardData({ data }: { data: LiftArray }) {
-  const weightData: WeightMap = useContext(DataContext).chonk;
+export function LiftLeaderboardData({ data }: { data: LiftData[] }) {
+  const weightData: WeightMap = useContext(DataContext).weightData;
   const leaderboardData: LeaderBoardDatum[] = calculateLiftData(data, weightData);
   const leaderboardSortContext: LeaderboardSortContextData = useContext(LeaderboardSortContext);
   const sortedData = leaderboardData.sort(getSortFunc(leaderboardSortContext.sortMethod));
@@ -62,11 +63,15 @@ function LeaderBoardEntry({
   );
 }
 
-function calculateLiftData(liftData: LiftArray, weightData: WeightMap) {
+function calculateLiftData(liftData: LiftData[], weightData: WeightMap) {
   return liftData.map((datum) => {
-    const liftWeight = datum.weight;
-    const personWeight = weightData[datum.name];
-    return { name: datum.name, weight: liftWeight, percentage: Math.round((liftWeight * 100) / personWeight) };
+    const liftWeight = datum.curr1RM;
+    const bodyWeight = weightData[datum.name];
+    return {
+      name: datum.name,
+      weight: liftWeight,
+      percentage: getLiftAsPercentageOfBodyWeight(liftWeight, bodyWeight),
+    };
   });
 }
 

@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import styles from "./leaderboard.module.scss";
-import { LiftArray, WeightMap } from "@/lib/google-sheets";
+import { LiftData, WeightMap } from "@/lib/google-sheets";
 import SortSelector from "./sort-selector";
 import LeaderboardTitle from "./leaderboard-title";
 import { LiftLeaderboardData, WeightLeaderboardData } from "./leaderboard-data";
@@ -13,13 +13,13 @@ export type LeaderboardData = {
 
 interface Props {
   title: string;
-  data: LiftArray | WeightMap;
+  data: LiftData[] | WeightMap;
 }
 
 export default function Leaderboard({ title, data }: Props): ReactElement {
   let leaderboardData;
   if (Array.isArray(data)) {
-    let liftData = data as LiftArray;
+    let liftData = data as LiftData[];
     leaderboardData = <LiftLeaderboardData data={liftData} />;
   } else {
     let weightData = data as WeightMap;

@@ -1,8 +1,9 @@
-import { LiftArray, WeightMap } from "@/lib/google-sheets";
+import { LiftData, WeightMap } from "@/lib/google-sheets";
 import styles from "./tabs.module.scss";
 import Leaderboard from "../leaderboard/leaderboard";
 import { useContext } from "react";
 import { DataContext } from "@/lib/context-providers/data-provider";
+import Chart from "../chart/chart";
 
 interface WeightTabProps {
   tabName: string;
@@ -15,14 +16,14 @@ interface LiftTabProps {
 }
 
 interface TabProps {
-  data: LiftArray | WeightMap;
+  data: LiftData[] | WeightMap;
   tabName: string;
   active: boolean;
 }
 
 export function WeightTabContent({ tabName, active }: WeightTabProps) {
   const dataContext = useContext(DataContext);
-  return <TabContent data={dataContext.chonk} tabName={tabName} active={active} />;
+  return <TabContent data={dataContext.weightData} tabName={tabName} active={active} />;
 }
 
 export function LiftTabContent({ tabName, active }: LiftTabProps) {
@@ -34,6 +35,7 @@ function TabContent({ data, tabName, active }: TabProps) {
   return (
     <div className={active ? styles.active : styles.inactive}>
       <Leaderboard data={data} title={tabName} key={tabName} />
+      <Chart liftName={tabName} />
     </div>
   );
 }
