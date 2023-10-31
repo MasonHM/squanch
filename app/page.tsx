@@ -26,7 +26,7 @@ export default function Home() {
   }, []);
 
   return (
-    <>
+    <div className={styles.page}>
       <TabGroup>
         {TABS.map((tabName: string, index: number) => (
           <Tab
@@ -59,6 +59,6 @@ export default function Home() {
           fasterLoops={tcRef.current?.fasterInterval.bind(tcRef.current)}
         />
       </div>
-    </>
+    </div>
   );
 }

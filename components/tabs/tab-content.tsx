@@ -33,7 +33,7 @@ export function LiftTabContent({ tabName, active }: LiftTabProps) {
 
 function TabContent({ data, tabName, active }: TabProps) {
   return (
-    <div className={active ? styles.active : styles.inactive}>
+    <div className={`${styles.content} ${active ? styles.active : styles.inactive}`}>
       <Leaderboard data={data} title={tabName} key={tabName} />
       <Chart liftName={tabName} />
     </div>
