@@ -15,7 +15,7 @@ export default function SortSelector() {
         className={`${styles.selector} ${sortContext.sortMethod == SortMethod.weight ? styles.active : ""}`}
         onClick={() => sortContext.setSortMethod(SortMethod.weight)}
       >
-        lbs
+        lb
       </span>
       &nbsp;/&nbsp;
       <span

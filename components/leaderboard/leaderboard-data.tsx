@@ -58,7 +58,7 @@ function LeaderBoardEntry({
 }) {
   return (
     <p key={name}>
-      {place}. {name} - {weight} lbs{percentage ? ` (${percentage}%)` : ``}
+      {place}. {name} - {weight} lb{percentage ? ` (${percentage}%)` : ``}
     </p>
   );
 }
