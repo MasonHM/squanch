@@ -37,7 +37,7 @@ export async function getSquanchData(): Promise<LiftData[]> {
 }
 
 export async function getBunchData(): Promise<LiftData[]> {
-  return processLiftRows(await getData(BUNCH_CELL_RANGE));
+  return processLiftRows(await getData(BUNCH_CELL_RANGE), true);
 }
 
 export async function getDunchData(): Promise<LiftData[]> {
@@ -91,7 +91,7 @@ function processWeightRows(rows: any[][]): WeightMap {
   return result;
 }
 
-function processLiftRows(rows: any[][]): LiftData[] {
+function processLiftRows(rows: any[][], removeFirstDataRow: boolean = false): LiftData[] {
   const names = rows[0];
   const result: LiftData[] = [];
 
@@ -103,7 +103,8 @@ function processLiftRows(rows: any[][]): LiftData[] {
       const currLift = rows[j][i];
       if (currLift) {
         curr1RM = currLift;
-        rawData[j - 1] = currLift;
+        const indicesToSubtract = removeFirstDataRow ? 2 : 1;
+        rawData[j - indicesToSubtract] = currLift;
       }
     }
     result.push({ name: names[i], curr1RM: curr1RM, raw: rawData });
