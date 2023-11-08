@@ -17,7 +17,6 @@ import {
 } from "chart.js";
 import { Pie, Line } from "react-chartjs-2";
 import styles from "./chart.module.scss";
-import { CombinedData, LiftData, WeightMap } from "@/lib/google-sheets";
 import { getShuffledColors } from "@/lib/colors/color-helper";
 import { DataContext } from "@/lib/context-providers/data-provider";
 import {
@@ -26,6 +25,7 @@ import {
   LeaderboardSortMethod,
 } from "@/lib/context-providers/sort-provider";
 import { getLiftAsPercentageOfBodyWeight } from "@/lib/weight/weight-helper";
+import { CombinedData, LiftData, WeightMap } from "@/lib/storage/data";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale, ArcElement);
 

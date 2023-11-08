@@ -1,6 +1,7 @@
 import "server-only";
 import * as google from "@googleapis/sheets";
-import { CACHE_EXPIRY_TIME_MILLIS } from "./constants";
+import { CACHE_EXPIRY_TIME_MILLIS } from "../constants";
+import { CombinedData, LiftData, WeightMap } from "./data";
 
 const googleSheetsAuth = google.auth.fromAPIKey(process.env.GOOGLE_SHEETS_API_KEY || "");
 const sheets = google.sheets({ version: "v4", auth: googleSheetsAuth });
@@ -10,27 +11,6 @@ const BUNCH_CELL_RANGE = "Bunch (v2)!K2:Q82";
 const SQUANCH_CELL_RANGE = "Squanch (v2)!K2:Q81";
 const DUNCH_CELL_RANGE = "Dunch (v2)!K2:Q81";
 const DATE_CELL_RANGE = "Bunch (v2)!A4:A82";
-
-export type LiftData = {
-  name: string;
-  curr1RM: number;
-  raw: { [index: number]: number };
-};
-
-export type WeightMap = {
-  [name: string]: number;
-};
-
-export type CombinedData = {
-  liftData: {
-    [name: string]: LiftData[];
-    squanch: LiftData[];
-    bunch: LiftData[];
-    dunch: LiftData[];
-  };
-  weightData: WeightMap;
-  graphLabels: string[];
-};
 
 export async function getSquanchData(): Promise<LiftData[]> {
   return processLiftRows(await getData(SQUANCH_CELL_RANGE));

@@ -1,4 +1,4 @@
-import { getChonkData } from "@/lib/google-sheets";
+import { getChonkData } from "@/lib/storage/google-sheets";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {

@@ -1,9 +1,9 @@
-import { LiftData, WeightMap } from "@/lib/google-sheets";
 import styles from "./tabs.module.scss";
 import Leaderboard from "../leaderboard/leaderboard";
 import { useContext } from "react";
 import { DataContext } from "@/lib/context-providers/data-provider";
 import Chart from "../chart/chart";
+import { LiftData, WeightMap } from "@/lib/storage/data";
 
 interface WeightTabProps {
   tabName: string;

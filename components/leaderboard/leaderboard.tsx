@@ -1,9 +1,9 @@
 import { ReactElement } from "react";
 import styles from "./leaderboard.module.scss";
-import { LiftData, WeightMap } from "@/lib/google-sheets";
 import SortSelector from "./sort-selector";
 import LeaderboardTitle from "./leaderboard-title";
 import { LiftLeaderboardData, WeightLeaderboardData } from "./leaderboard-data";
+import { LiftData, WeightMap } from "@/lib/storage/data";
 
 export type LeaderboardData = {
   name: string;

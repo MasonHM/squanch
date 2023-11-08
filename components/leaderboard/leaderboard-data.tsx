@@ -1,9 +1,9 @@
 import { LeaderboardSortContext, LeaderboardSortContextData, getSortFunc } from "@/lib/context-providers/sort-provider";
-import { LiftData, WeightMap } from "@/lib/google-sheets";
 import { useContext } from "react";
 import styles from "./leaderboard.module.scss";
 import { DataContext } from "@/lib/context-providers/data-provider";
 import { getLiftAsPercentageOfBodyWeight } from "@/lib/weight/weight-helper";
+import { LiftData, WeightMap } from "@/lib/storage/data";
 
 export type LeaderBoardDatum = {
   name: string;

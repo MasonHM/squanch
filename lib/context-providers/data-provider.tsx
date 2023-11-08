@@ -1,8 +1,8 @@
 import { DATA_REFRESH_MILLIS } from "@/lib/constants";
-import { CombinedData } from "@/lib/google-sheets";
 import { useInterval } from "@/lib/hooks/use-interval";
 import { ReactNode, createContext, useState } from "react";
 import styles from "@/app/page.module.scss";
+import { CombinedData } from "../storage/data";
 
 interface Props {
   children: ReactNode;
@@ -34,7 +34,7 @@ export default function DataProvider({ children }: Props) {
 
   return (
     <DataContext.Provider value={data}>
-      {data.liftData.squanch.length == 0 ? (
+      {data == DEFAULT_DATA ? (
         <div className={styles.loading}>
           <h1>SQUANCH...</h1>
         </div>
