@@ -10,6 +10,8 @@ export async function enableNotifications() {
         await sendNotification("Notifications enabled", "SQUAAAANCH");
       }
     });
+  } else {
+    alert("Service worker not supported");
   }
 }
 
