@@ -14,8 +14,8 @@ export function useInterval(callback: Function, delay: number | null) {
       }
     }
 
-    tick();
     if (delay !== null) {
+      tick();
       let id = setInterval(tick, delay);
       return () => clearInterval(id);
     }
