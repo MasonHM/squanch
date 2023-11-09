@@ -1,20 +1,23 @@
-export function enableNotifications() {
-  // Check if the browser supports notifications
-  if (!("Notification" in window)) {
-    alert("This browser does not support desktop notification");
-  } else if (Notification.permission === "granted") {
-    sendNotification("Notifications already enabled");
-  } else if (Notification.permission !== "denied") {
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        sendNotification("Notifications turned on for squanch.college");
+let registration: ServiceWorkerRegistration;
+
+export async function enableNotifications() {
+  if ("serviceWorker" in navigator) {
+    registration = await navigator.serviceWorker.register("/service-worker.js");
+
+    navigator.serviceWorker.ready.then(async () => {
+      const result = await window.Notification.requestPermission();
+      if (result === "granted") {
+        await sendNotification("Notifications enabled", "SQUAAAANCH");
       }
     });
   }
 }
 
-export function sendNotification(text: string) {
-  const notification = new Notification(text, {
-    icon: "/favicon.ico",
-  });
+export async function sendNotification(body: string, title?: string) {
+  if (registration) {
+    await registration.showNotification(title ? title : "New Crunch", {
+      body: body,
+      icon: "/favicon.ico",
+    });
+  }
 }
