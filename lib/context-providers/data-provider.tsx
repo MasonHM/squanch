@@ -2,7 +2,8 @@ import { DATA_REFRESH_MILLIS } from "@/lib/constants";
 import { useInterval } from "@/lib/hooks/use-interval";
 import { ReactNode, createContext, useState } from "react";
 import styles from "@/app/page.module.scss";
-import { CombinedData } from "../storage/data";
+import { CombinedData, findDifferencesBetweenCombinedData } from "../storage/data";
+import { sendNotification } from "../notifications/notification-helper";
 
 interface Props {
   children: ReactNode;
@@ -27,6 +28,10 @@ export default function DataProvider({ children }: Props) {
     const res = await fetch(`/api/combined`);
     const newData = await res.json();
     if (JSON.stringify(newData) !== JSON.stringify(data)) {
+      if (data !== DEFAULT_DATA) {
+        const updates = findDifferencesBetweenCombinedData(data, newData);
+        updates.forEach((update) => sendNotification(update));
+      }
       setData(newData);
     }
   };
