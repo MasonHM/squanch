@@ -1,9 +1,8 @@
 import { DATA_REFRESH_MILLIS } from "@/lib/constants";
 import { useInterval } from "@/lib/hooks/use-interval";
-import { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useEffect, useState } from "react";
 import styles from "@/app/page.module.scss";
-import { CombinedData, findDifferencesBetweenCombinedData } from "../storage/data";
-import { sendNotification } from "../notifications/notification-helper";
+import { CombinedData } from "../storage/data";
 
 interface Props {
   children: ReactNode;
@@ -23,19 +22,31 @@ export const DataContext = createContext<CombinedData>(DEFAULT_DATA);
 
 export default function DataProvider({ children }: Props) {
   const [data, setData] = useState<CombinedData>(DEFAULT_DATA);
+  const [refreshInterval, setRefreshInterval] = useState<number | null>(DATA_REFRESH_MILLIS);
 
   const fetchData = async () => {
     const res = await fetch(`/api/combined`);
     const newData = await res.json();
     if (JSON.stringify(newData) !== JSON.stringify(data)) {
-      if (data !== DEFAULT_DATA) {
-        const updates = findDifferencesBetweenCombinedData(data, newData);
-        updates.forEach((update) => sendNotification(update));
-      }
       setData(newData);
     }
   };
-  useInterval(fetchData, DATA_REFRESH_MILLIS);
+  useInterval(fetchData, refreshInterval);
+
+  const disableInterval = () => setRefreshInterval(null);
+  const enableInterval = () => setRefreshInterval(DATA_REFRESH_MILLIS);
+  const disableIntervalIfHidden = () => {
+    if (document.hidden) {
+      disableInterval();
+    } else {
+      enableInterval();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("visibilitychange", () => disableIntervalIfHidden());
+    return window.removeEventListener("visibilitychange", () => disableIntervalIfHidden());
+  }, []);
 
   return (
     <DataContext.Provider value={data}>
