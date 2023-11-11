@@ -8,6 +8,7 @@ import { TabCycle } from "../components/tabs/tab-cycle";
 import { LiftTabContent, WeightTabContent } from "../components/tabs/tab-content";
 import LeaderboardSortProvider from "@/lib/context-providers/sort-provider";
 import DataProvider from "@/lib/context-providers/data-provider";
+import SubscribeButton from "@/components/notifications/subscribe-button";
 
 const TABS: string[] = ["squanch", "bunch", "dunch", "chonk"];
 
@@ -41,6 +42,7 @@ export default function Home() {
         ))}
       </TabGroup>
       <div className={styles.content}>
+        <SubscribeButton />
         <DataProvider>
           <LeaderboardSortProvider>
             {TABS.map((tabName: string, index: number) =>
@@ -52,7 +54,6 @@ export default function Home() {
             )}
           </LeaderboardSortProvider>
         </DataProvider>
-
         <Footer
           startLoops={tcRef.current?.startInterval.bind(tcRef.current)}
           stopLoops={tcRef.current?.stopInterval.bind(tcRef.current)}
