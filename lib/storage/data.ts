@@ -19,8 +19,22 @@ export type CombinedData = {
   graphLabels: string[];
 };
 
-export function findDifferencesBetweenCombinedData(oldData: CombinedData, newData: CombinedData): string[] {
-  let differences: string[] = [];
+export const DEFAULT_DATA: CombinedData = {
+  liftData: {
+    squanch: [],
+    bunch: [],
+    dunch: [],
+  },
+  weightData: {},
+  graphLabels: [],
+};
+
+export type Update = {
+  title: string;
+  body: string;
+};
+export function findDifferencesBetweenCombinedData(oldData: CombinedData, newData: CombinedData): Update[] {
+  let differences: Update[] = [];
   const lifts = Object.keys(oldData.liftData);
   for (let i = 0; i < lifts.length; i++) {
     const lift = lifts[i];
@@ -31,8 +45,8 @@ export function findDifferencesBetweenCombinedData(oldData: CombinedData, newDat
   return differences;
 }
 
-function findDifferencesBetweenLiftData(oldData: LiftData[], newData: LiftData[], liftName: string): string[] {
-  let differences: string[] = [];
+function findDifferencesBetweenLiftData(oldData: LiftData[], newData: LiftData[], liftName: string): Update[] {
+  let differences: Update[] = [];
   const curr1RMMap: { [name: string]: number } = {};
   for (let i = 0; i < oldData.length; i++) {
     const oldDatum: LiftData = oldData[i];
@@ -44,18 +58,21 @@ function findDifferencesBetweenLiftData(oldData: LiftData[], newData: LiftData[]
     const old1RM = curr1RMMap[newDatum.name];
     const new1RM = newDatum.curr1RM;
     if (new1RM != old1RM) {
-      differences.push(`${newDatum.name} set a new ${liftName} 1RM of ${new1RM}!`);
+      differences.push({
+        title: `BREAKING NEWS - ${liftName.toUpperCase()}`,
+        body: `${newDatum.name} set a new ${liftName} 1RM of ${new1RM}!`,
+      });
     }
   }
   return differences;
 }
 
-function findDifferenceBetweenWeightMap(oldData: WeightMap, newData: WeightMap): string[] {
-  let differences: string[] = [];
+function findDifferenceBetweenWeightMap(oldData: WeightMap, newData: WeightMap): Update[] {
+  let differences: Update[] = [];
   const oldDataKeys = Object.keys(oldData);
   const newDataKeys = Object.keys(newData);
   if (oldDataKeys.length != newDataKeys.length) {
-    differences.push(`A new challenger appeared...`);
+    differences.push({ title: "Who?", body: "A new challenger appeared..." });
   }
   for (let i = 0; i < oldDataKeys.length; i++) {
     const person = oldDataKeys[i];
@@ -63,9 +80,11 @@ function findDifferenceBetweenWeightMap(oldData: WeightMap, newData: WeightMap):
     const newWeight = newData[person];
     if (oldWeight != newWeight) {
       const weightDifference = Math.round(((newWeight - oldWeight) * 100) / 100);
-      differences.push(
-        `${person} now weighs ${newWeight} lb (${weightDifference > 0 ? `+` : ``}${weightDifference} lb)`
-      );
+      const title = weightDifference > 0 ? "Fat Fuck Alert" : "Skinny Bitch Alert";
+      differences.push({
+        title: title,
+        body: `${person} now weighs ${newWeight} lb (${weightDifference > 0 ? `+` : ``}${weightDifference} lb)`,
+      });
     }
   }
 
