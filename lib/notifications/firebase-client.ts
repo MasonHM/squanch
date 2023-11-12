@@ -28,9 +28,7 @@ export async function requestNotificationPermissions() {
   let resultPermission = "default";
   await Notification.requestPermission().then((permission) => {
     if (permission === "granted") {
-      getToken(getFirebaseMessaging(), {
-        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-      }).then(async (firebaseToken) => {
+      firebaseServiceWorkerHack().then(async (firebaseToken) => {
         console.log("Notification permission granted: " + firebaseToken);
         localStorage.setItem("fcm-token", firebaseToken);
         const res = await fetch(`/api/subscribe`, {
@@ -45,4 +43,23 @@ export async function requestNotificationPermissions() {
     resultPermission = permission;
   });
   return resultPermission;
+}
+
+async function firebaseServiceWorkerHack(): Promise<string> {
+  const messaging = getFirebaseMessaging();
+
+  return getToken(messaging, {
+    vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+  }).catch((err) => {
+    // https://github.com/firebase/firebase-js-sdk/issues/7693
+    const expectedError =
+      "AbortError: Failed to execute 'subscribe' on 'PushManager': Subscription failed - no active Service Worker";
+    if (err.toString() === expectedError) {
+      return getToken(messaging, {
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      });
+    } else {
+      throw err;
+    }
+  });
 }
