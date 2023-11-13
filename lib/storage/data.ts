@@ -16,7 +16,6 @@ export type CombinedData = {
     dunch: LiftData[];
   };
   weightData: WeightMap;
-  graphLabels: string[];
 };
 
 export const DEFAULT_DATA: CombinedData = {
@@ -26,7 +25,6 @@ export const DEFAULT_DATA: CombinedData = {
     dunch: [],
   },
   weightData: {},
-  graphLabels: [],
 };
 
 export type Update = {

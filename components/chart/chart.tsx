@@ -125,7 +125,7 @@ function convertDataToLineChartData(
   const shuffledColors = getShuffledColors();
   const currentLiftArray: LiftData[] = combinedData.liftData[liftName];
 
-  const labels: string[] = createChartLabels(combinedData);
+  const labels: string[] = createChartLabels();
 
   return {
     labels,
@@ -153,16 +153,31 @@ function convertDataToLineChartData(
   };
 }
 
-function createChartLabels(combinedData: CombinedData) {
+function createChartLabels() {
   const now = new Date();
   const currMonth = now.getMonth() + 1;
   const currDay = now.getDate();
-  return combinedData.graphLabels.filter((monthDayString) => {
+  const dateRange = getDateRangeForGraph();
+  return dateRange.filter((monthDayString) => {
     const [labelMonth, labelDay] = monthDayString.split("/");
     if (currMonth < Number(labelMonth) || (currMonth == Number(labelMonth) && currDay < Number(labelDay))) {
       return false;
     }
     return true;
+  });
+}
+
+const SQUANCH_BEGIN = new Date("2023-09-28T00:00:00");
+function getDateRangeForGraph(): string[] {
+  const now = new Date();
+  const milliSinceBegin = now.getTime() - SQUANCH_BEGIN.getTime();
+  const daysSinceBegin = Math.abs(Math.round(milliSinceBegin / (1000 * 60 * 60 * 24)));
+  return [...Array(daysSinceBegin).keys()].map((dayCount): string => {
+    const currDate = new Date(SQUANCH_BEGIN);
+    currDate.setDate(currDate.getDate() + dayCount);
+    const month = currDate.getMonth() + 1;
+    const day = currDate.getDate();
+    return `${month}/${day}`;
   });
 }
 

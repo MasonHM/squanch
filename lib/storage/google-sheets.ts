@@ -10,7 +10,6 @@ const CHONK_CELL_RANGE = "Bunch (v2)!A2:H3";
 const BUNCH_CELL_RANGE = "Bunch (v2)!K2:Q82";
 const SQUANCH_CELL_RANGE = "Squanch (v2)!K2:Q81";
 const DUNCH_CELL_RANGE = "Dunch (v2)!K2:Q81";
-const DATE_CELL_RANGE = "Bunch (v2)!A4:A82";
 
 export async function getSquanchData(): Promise<LiftData[]> {
   return processLiftRows(await getData(SQUANCH_CELL_RANGE));
@@ -33,27 +32,20 @@ export async function getAllData(): Promise<CombinedData> {
   const squanchDataRequest: Promise<LiftData[]> = getSquanchData();
   const bunchDataRequest: Promise<LiftData[]> = getBunchData();
   const dunchDataRequest: Promise<LiftData[]> = getDunchData();
-  const dateRangeRequest: Promise<string[]> = getDateRangeForGraph();
 
-  const [chonkData, squanchData, bunchData, dunchData, dateRange] = await Promise.all([
+  const [chonkData, squanchData, bunchData, dunchData] = await Promise.all([
     chonkDataRequest,
     squanchDataRequest,
     bunchDataRequest,
     dunchDataRequest,
-    dateRangeRequest,
   ]);
 
   const combinedData: CombinedData = {
     liftData: { squanch: squanchData, bunch: bunchData, dunch: dunchData },
     weightData: chonkData,
-    graphLabels: dateRange,
   };
 
   return combinedData;
-}
-
-async function getDateRangeForGraph(): Promise<string[]> {
-  return processDatesForGraph(await getData(DATE_CELL_RANGE));
 }
 
 function processWeightRows(rows: any[][]): WeightMap {
@@ -91,10 +83,6 @@ function processLiftRows(rows: any[][], removeFirstDataRow: boolean = false): Li
   }
 
   return result;
-}
-
-function processDatesForGraph(rows: any[][]): string[] {
-  return rows.map((row) => row[0]);
 }
 
 const rawDataCache: {
