@@ -13,10 +13,7 @@ export default function PushNotificationHandler() {
     onMessage(messaging, (payload) => {
       const notification = payload.notification;
       if (notification) {
-        new Notification(notification.title || "Notification", {
-          body: notification?.body,
-          icon: notification?.icon,
-        });
+        alert(`${notification.title} - ${notification.body}`);
       }
     });
   }

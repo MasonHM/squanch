@@ -26,12 +26,10 @@ customInitFirebase();
 
 export function sendPushNotification(title: string, body: string) {
   const message: Message = {
-    notification: {
-      title: title,
-      body: body,
-    },
     webpush: {
       notification: {
+        title: title,
+        body: body,
         icon: "/favicon.ico",
       },
     },
