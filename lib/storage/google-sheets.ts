@@ -64,7 +64,7 @@ function processWeightRows(rows: any[][]): WeightMap {
   // For each name (column), the corresponding weight is directly below
   for (let i = 0; i < names.length; i++) {
     if (names[i] != "") {
-      result[names[i]] = weights[i];
+      result[names[i]] = Number(weights[i]);
     }
   }
 
@@ -80,7 +80,7 @@ function processLiftRows(rows: any[][], removeFirstDataRow: boolean = false): Li
     let curr1RM = 0;
     const rawData: { [index: number]: number } = {};
     for (let j = 1; j < rows.length; j++) {
-      const currLift = rows[j][i];
+      const currLift = Number(rows[j][i]);
       if (currLift) {
         curr1RM = currLift;
         const indicesToSubtract = removeFirstDataRow ? 2 : 1;
