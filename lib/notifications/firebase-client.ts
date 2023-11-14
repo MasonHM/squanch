@@ -1,5 +1,5 @@
 import { FirebaseApp, initializeApp } from "firebase/app";
-import { Messaging, getMessaging, getToken } from "firebase/messaging";
+import { Messaging, getMessaging, getToken, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBXNYY6DqNDA3tuNSlFqjyHcOuDnrcylpE",
@@ -9,6 +9,10 @@ const firebaseConfig = {
   messagingSenderId: "1090383879006",
   appId: "1:1090383879006:web:3c07c2f17311b98fc10dcf",
 };
+
+export async function isFirebaseSupported() {
+  return await isSupported();
+}
 
 export function getFirebaseMessaging(): Messaging {
   const firebaseApp = customInitFirebase();

@@ -1,23 +1,28 @@
-import { requestNotificationPermissions } from "@/lib/notifications/firebase-client";
+import { isFirebaseSupported, requestNotificationPermissions } from "@/lib/notifications/firebase-client";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./subscribe-button.module.scss";
 import { useEffect, useState } from "react";
-import { browserSupportsNotifications } from "@/lib/notifications/notification-handler";
 
 export default function SubscribeButton() {
   const [subscribed, setSubscribed] = useState(false);
   const [notificationsSupported, setNotificationsSupported] = useState(false);
 
   useEffect(() => {
-    const notifications = browserSupportsNotifications();
-    setNotificationsSupported(notifications);
-    if (notifications && Notification.permission === "granted") {
+    const checkFirebaseSupport = async () => {
+      setNotificationsSupported(await isFirebaseSupported());
+    };
+
+    checkFirebaseSupport();
+  }, []);
+
+  useEffect(() => {
+    if (notificationsSupported && Notification.permission === "granted") {
       setSubscribed(true);
     } else {
       setSubscribed(false);
     }
-  }, []);
+  }, [notificationsSupported]);
 
   return subscribed || !notificationsSupported ? (
     <></>
