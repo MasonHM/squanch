@@ -1,22 +1,32 @@
 "use client";
+import NotificationModal from "@/components/notifications/notification-modal";
 import { getFirebaseMessaging } from "@/lib/notifications/firebase-client";
-import { Messaging, onMessage } from "firebase/messaging";
+import { onMessage } from "firebase/messaging";
 import { useEffect, useState } from "react";
 
 export default function PushNotificationHandler() {
-  const [messaging, setMessaging] = useState<Messaging>();
+  const [updates, setUpdates] = useState<string[]>([]);
+  const [notificationsSupported, setNotificationsSupported] = useState(false);
+
   useEffect(() => {
-    setMessaging(getFirebaseMessaging());
+    const notifications = browserSupportsNotifications();
+    setNotificationsSupported(notifications);
   }, []);
 
-  if (messaging) {
+  if (notificationsSupported) {
+    const messaging = getFirebaseMessaging();
+
     onMessage(messaging, (payload) => {
       const notification = payload.notification;
       if (notification) {
-        alert(`${notification.title} - ${notification.body}`);
+        setUpdates([`${notification.title} - ${notification.body}`, ...updates]);
       }
     });
   }
 
-  return <></>;
+  return notificationsSupported ? <NotificationModal updates={updates} exitCallback={() => setUpdates([])} /> : <></>;
+}
+
+export function browserSupportsNotifications() {
+  return "Notification" in window;
 }
