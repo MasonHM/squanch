@@ -171,7 +171,7 @@ const SQUANCH_BEGIN = new Date("2023-09-28T00:00:00");
 function getDateRangeForGraph(): string[] {
   const now = new Date();
   const milliSinceBegin = now.getTime() - SQUANCH_BEGIN.getTime();
-  const daysSinceBegin = Math.abs(Math.round(milliSinceBegin / (1000 * 60 * 60 * 24)));
+  const daysSinceBegin = Math.abs(Math.ceil(milliSinceBegin / (1000 * 60 * 60 * 24)));
   return [...Array(daysSinceBegin).keys()].map((dayCount): string => {
     const currDate = new Date(SQUANCH_BEGIN);
     currDate.setDate(currDate.getDate() + dayCount);
