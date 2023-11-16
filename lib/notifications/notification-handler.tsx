@@ -3,9 +3,10 @@ import NotificationModal from "@/components/notifications/notification-modal";
 import { getFirebaseMessaging, isFirebaseSupported } from "@/lib/notifications/firebase-client";
 import { onMessage } from "firebase/messaging";
 import { useEffect, useState } from "react";
+import { Update } from "../storage/data";
 
 export default function PushNotificationHandler() {
-  const [updates, setUpdates] = useState<string[]>([]);
+  const [updates, setUpdates] = useState<Update[]>([]);
   const [notificationsSupported, setNotificationsSupported] = useState(false);
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function PushNotificationHandler() {
     onMessage(messaging, (payload) => {
       const notification = payload.notification;
       if (notification) {
-        setUpdates([`${notification.title} - ${notification.body}`, ...updates]);
+        setUpdates([{ title: notification.title || "", body: notification.body || "" }, ...updates]);
       }
     });
   }

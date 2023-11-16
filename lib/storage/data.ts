@@ -57,7 +57,7 @@ function findDifferencesBetweenLiftData(oldData: LiftData[], newData: LiftData[]
     const new1RM = newDatum.curr1RM;
     if (new1RM != old1RM) {
       differences.push({
-        title: `BREAKING NEWS - ${liftName.toUpperCase()}`,
+        title: `🚨🚨 ${liftName.toUpperCase()} 🚨🚨`,
         body: `${newDatum.name} set a new ${liftName} 1RM of ${new1RM}!`,
       });
     }
@@ -78,7 +78,10 @@ function findDifferenceBetweenWeightMap(oldData: WeightMap, newData: WeightMap):
     const newWeight = newData[person];
     if (oldWeight != newWeight) {
       const weightDifference = Math.round(((newWeight - oldWeight) * 100) / 100);
-      const title = weightDifference > 0 ? "Fat Fuck Alert" : "Skinny Bitch Alert";
+      const title =
+        weightDifference > 0
+          ? process.env.WEIGHT_GAIN_NOTIFICATION_TITLE || "Chonk"
+          : process.env.WEIGHT_LOSS_NOTIFICATION_TITLE || "De-chonk";
       differences.push({
         title: title,
         body: `${person} now weighs ${newWeight} lb (${weightDifference > 0 ? `+` : ``}${weightDifference} lb)`,
@@ -87,4 +90,22 @@ function findDifferenceBetweenWeightMap(oldData: WeightMap, newData: WeightMap):
   }
 
   return differences;
+}
+
+export function combineUpdatesSingleUpdate(updates: Update[]) {
+  let result: Update = { title: "", body: "" };
+
+  if (updates.length > 1) {
+    let updateString = "";
+    for (let i = 0; i < updates.length; i++) {
+      const update: Update = updates[i];
+      updateString += `${i == 0 ? "" : "\n"}${update.body}`;
+    }
+    result.title = "🚨🚨 BREAKING NEWS 🚨🚨";
+    result.body = updateString;
+  } else {
+    result = updates[0];
+  }
+
+  return result;
 }

@@ -1,6 +1,11 @@
 import { getAllData } from "@/lib/storage/google-sheets";
 import { NextRequest, NextResponse } from "next/server";
-import { CombinedData, Update, findDifferencesBetweenCombinedData } from "@/lib/storage/data";
+import {
+  CombinedData,
+  Update,
+  combineUpdatesSingleUpdate,
+  findDifferencesBetweenCombinedData,
+} from "@/lib/storage/data";
 import { sendPushNotification } from "@/lib/notifications/firebase-admin";
 import { getCombinedDataFromS3, putCombinedDataToS3 } from "@/lib/storage/s3";
 
@@ -23,8 +28,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 }
 
 function sendPushNotificationsForUpdates(updates: Update[]) {
-  for (let i = 0; i < updates.length; i++) {
-    const update: Update = updates[i];
-    sendPushNotification(update.title, update.body);
-  }
+  const combinedUpdate = combineUpdatesSingleUpdate(updates);
+  sendPushNotification(combinedUpdate.title, combinedUpdate.body);
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import styles from "./notification-modal.module.scss";
+import { Update } from "@/lib/storage/data";
 
-export default function NotificationModal({ updates, exitCallback }: { updates: string[]; exitCallback: () => void }) {
+export default function NotificationModal({ updates, exitCallback }: { updates: Update[]; exitCallback: () => void }) {
   const [visible, setVisible] = useState(false);
 
   const handleExit = () => {
@@ -20,7 +21,10 @@ export default function NotificationModal({ updates, exitCallback }: { updates: 
         <div className={styles.updates}>
           {updates.map((update, index) => (
             <>
-              <p key={index}>{update}</p>
+              <p key={`t${index}`} className={styles.title}>
+                {update.title}
+              </p>
+              <p key={`b${index}`}>{update.body}</p>
               {index !== updates.length - 1 ? <br /> : <></>}
             </>
           ))}
