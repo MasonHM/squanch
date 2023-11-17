@@ -27,10 +27,19 @@ export default function SubscribeButton() {
     }
   }, [notificationsSupported]);
 
-  const updateToken = () => {
+  const updateToken = async () => {
     const token = localStorage.getItem("fcm-token") || "No token found";
     console.log("FCM Token: " + token);
-    setModalUpdates([{ title: "FCM Token", body: token }]);
+    const swRegistrations = await navigator.serviceWorker.getRegistrations();
+    let regUpdate = { title: "Service Worker (0)", body: "No service workers found" };
+    if (swRegistrations.length > 0) {
+      const firstReg = swRegistrations[0];
+      regUpdate = {
+        title: `Service Worker (${swRegistrations.length})`,
+        body: `${firstReg.active?.state} -- ${firstReg.scope}`,
+      };
+    }
+    setModalUpdates([{ title: "FCM Token", body: token }, regUpdate]);
   };
 
   return !notificationsSupported ? (
