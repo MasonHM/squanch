@@ -8,7 +8,7 @@ import {
 import { CombinedData, DEFAULT_DATA } from "@/lib/storage/data";
 
 const S3_BUCKET = "squanch.college";
-const S3_OBJECT = "dads.json";
+const S3_OBJECT = process.env.S3_OBJECT || "dads.json";
 
 let s3Client: S3Client;
 export function getS3Client() {

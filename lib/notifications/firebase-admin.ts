@@ -13,7 +13,7 @@ const firebaseAdminConfig = {
   }),
 };
 
-export const NOTIFICATION_TOPIC = "squanchdates";
+export const NOTIFICATION_TOPIC = process.env.NOTIFICATION_TOPIC || "squanchdates";
 
 let app: App;
 export function customInitFirebase(): App {
