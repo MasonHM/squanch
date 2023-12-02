@@ -24,7 +24,7 @@ export function customInitFirebase(): App {
 }
 customInitFirebase();
 
-export function sendPushNotification(title: string, body: string) {
+export async function sendPushNotification(title: string, body: string) {
   const message: Message = {
     webpush: {
       notification: {
@@ -37,7 +37,7 @@ export function sendPushNotification(title: string, body: string) {
   };
 
   const messaging: Messaging = getMessaging(app);
-  messaging
+  await messaging
     .send(message)
     .then((response) => {
       console.log("Successfully sent push notification:", response);

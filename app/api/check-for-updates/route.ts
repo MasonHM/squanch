@@ -18,7 +18,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   if (JSON.stringify(oldStats) !== JSON.stringify(currentStats)) {
     const updates: Update[] = findDifferencesBetweenCombinedData(oldStats, currentStats);
     console.log(`Updates found: ${JSON.stringify(updates)}`);
-    sendPushNotificationsForUpdates(updates);
+    await sendPushNotificationsForUpdates(updates);
     await putCombinedDataToS3(currentStats);
     return NextResponse.json({ updated: true, updates: updates });
   } else {
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
 }
 
-function sendPushNotificationsForUpdates(updates: Update[]) {
+async function sendPushNotificationsForUpdates(updates: Update[]) {
   const combinedUpdate = combineUpdatesSingleUpdate(updates);
-  sendPushNotification(combinedUpdate.title, combinedUpdate.body);
+  await sendPushNotification(combinedUpdate.title, combinedUpdate.body);
 }
