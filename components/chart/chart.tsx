@@ -155,29 +155,27 @@ function convertDataToLineChartData(
 
 function createChartLabels() {
   const now = new Date();
-  const currMonth = now.getMonth() + 1;
-  const currDay = now.getDate();
   const dateRange = getDateRangeForGraph();
-  return dateRange.filter((monthDayString) => {
-    const [labelMonth, labelDay] = monthDayString.split("/");
-    if (currMonth < Number(labelMonth) || (currMonth == Number(labelMonth) && currDay < Number(labelDay))) {
-      return false;
-    }
-    return true;
-  });
+  return dateRange
+    .filter((date: Date) => {
+      return date <= now;
+    })
+    .map((date: Date) => {
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      return `${month}/${day}`;
+    });
 }
 
 const SQUANCH_BEGIN = new Date("2023-09-28T00:00:00");
-function getDateRangeForGraph(): string[] {
+function getDateRangeForGraph(): Date[] {
   const now = new Date();
   const milliSinceBegin = now.getTime() - SQUANCH_BEGIN.getTime();
   const daysSinceBegin = Math.abs(Math.ceil(milliSinceBegin / (1000 * 60 * 60 * 24)));
-  return [...Array(daysSinceBegin).keys()].map((dayCount): string => {
+  return [...Array(daysSinceBegin).keys()].map((dayCount): Date => {
     const currDate = new Date(SQUANCH_BEGIN);
     currDate.setDate(currDate.getDate() + dayCount);
-    const month = currDate.getMonth() + 1;
-    const day = currDate.getDate();
-    return `${month}/${day}`;
+    return currDate;
   });
 }
 
